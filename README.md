@@ -3,7 +3,7 @@
 
 K-means clustering is a type of unsupervised learning algorithm used to group similar data points together in a dataset. It is commonly used in image segmentation to partition an image into multiple segments based on the similarity of the pixels. The goal of image segmentation is to change the representation of an image into something that is more meaningful and easier to analyze. It is usually used for locating objects and creating boundaries 1.
 
-** How Does It Work **
+**How Does It Work**
 
 1- Choose the number of clusters you want to find which is k.
 
