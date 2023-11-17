@@ -23,6 +23,9 @@ in our project and dataset, because Images are 2D matrices, we sould flatten the
 
 
 **Libraries**
+
 1- Numpy
+
 2-Pillow
+
 3-Numba
