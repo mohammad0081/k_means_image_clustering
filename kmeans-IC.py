@@ -1,6 +1,6 @@
-from PIL import Image
 import numpy as np
-
+from PIL import Image
+import matplotlib.pyplot as plt
 
 def data_redaer():
     dataset = []
@@ -22,54 +22,68 @@ def data_redaer():
     return dataset
 
 
-def assign_labels(dataset, centroids):
-
-    distances = np.linalg.norm(dataset[:, np.newaxis] - centroids, axis=2)
-    labels = np.argmin(distances, axis= 1)
-
-    return labels
+def init_centroids(X, k):
+    randidx = np.random.permutation(X.shape[0])
+    centroids = X[randidx[:k]]
+    return centroids
 
 
-def update_centroids(dataset, labels, K):
+def compute_centroids(X, idx, K):
+    m, n = X.shape
+    centroids = np.zeros((K, n))
 
-    n_features = dataset.shape[1]
-    updated_centroids = np.zeros((k, n_features))
+    for k in range(K) :
+        points = X[idx == k]
 
-    for i in range(K):
-        cluster_points = dataset[ labels == i]
+        if len(points) > 0:
+            centroids[k] = np.mean(points, axis= 0)
 
-        if len(cluster_points) > 0:
-            updated_centroids[i] = np.mean(cluster_points, axis=0)
-
-    return updated_centroids
+    return centroids
 
 
-def k_means_image_clustering(dataset, k, init_centroids, max_iters=100):
-    centroids = init_centroids
+def find_closest_centroid(X, centroids):
+    K = centroids.shape[0]
+    idx = np.zeros(X.shape[0], dtype=int)
+
+    for i in range(X.shape[0]):
+        distances = []
+        for j in range(centroids.shape[0]):
+            norm_i_j = np.linalg.norm(X[i] - centroids[j])
+            distances.append(norm_i_j)
+
+        idx[i] = np.argmin(distances)
+
+    return idx
+
+
+def run_k_means(X, initial_centroids, max_iters=100):
+    m, n = X.shape
+    K = initial_centroids.shape[0]
+    centroids = initial_centroids
+    idx = np.zeros(m)
 
     for i in range(max_iters):
         print(f'Epoch : {i} | K = {k}')
+        idx = find_closest_centroid(X, centroids)
+        centroids = compute_centroids(X, idx, K)
 
-        labels = assign_labels(dataset, centroids)
-        updated_centroids = update_centroids(dataset, labels, k)
-
-        centroids = updated_centroids
-
-    return centroids, labels
-
-
-
+    return centroids, idx
 
 dataset = data_redaer()
 
 for k in [3, 4, 5, 6, 7] :
 
-    init_centroids = dataset[ np.random.choice(len(dataset), k) ]
+    initial_centroids = init_centroids(dataset, k)
     # Run k-means clustering
-    centroids, labels = k_means_image_clustering(dataset, k, init_centroids= init_centroids)
+    centroids, labels = run_k_means(dataset, initial_centroids)
 
     # Reshape the centroids into images
     centroids = centroids.reshape((k, 16, 16))
+
+    if k == 5 :
+        for item in centroids :
+            plt.imshow(item, cmap='gray')
+            plt.show()
 
     for i in range(k):
 
@@ -77,6 +91,3 @@ for k in [3, 4, 5, 6, 7] :
         image = Image.fromarray(image_data)
 
         image.save(f"centroids/{k}/centroid{i + 1}.png")
-
-
-
